@@ -21,6 +21,7 @@ if(jQuery) (function($) {
 				var color = expandHex(input.val());
 				if( !color ) color = 'ffffff';
 				var hsb = hex2hsb(color);
+				var prefix = o.nohash ? '' : '#';
 				
 				// Create trigger
 				var trigger = $('<a class="miniColors-trigger" style="background-color: #' + color + '" href="#"></a>');
@@ -37,9 +38,10 @@ if(jQuery) (function($) {
 					.data('change', o.change ? o.change : null)
 					.data('close', o.close ? o.close : null)
 					.data('open', o.open ? o.open : null)
+					.data('prefix', prefix)
 					.attr('maxlength', 7)
 					.attr('autocomplete', 'off')
-					.val('#' + convertCase(color, o.letterCase));
+					.val(prefix + convertCase(color, o.letterCase));
 				
 				// Handle options
 				if( o.readonly ) input.prop('readonly', true);
@@ -48,21 +50,21 @@ if(jQuery) (function($) {
 				// Show selector when trigger is clicked
 				trigger.bind('click.miniColors', function(event) {
 					event.preventDefault();
-					if( input.val() === '' ) input.val('#');
+					if( input.val() === '' ) input.val(input.data('prefix'));
 					show(input);
-
+				
 				});
 				
 				// Show selector when input receives focus
 				input.bind('focus.miniColors', function(event) {
-					if( input.val() === '' ) input.val('#');
+					if( input.val() === '' ) input.val(input.data('prefix'));
 					show(input);
 				});
 				
 				// Hide on blur
 				input.bind('blur.miniColors', function(event) {
 					var hex = expandHex( hsb2hex(input.data('hsb')) );
-					input.val( hex ? '#' + convertCase(hex, input.data('letterCase')) : '' );
+					input.val( hex ? input.data('prefix') + convertCase(hex, input.data('letterCase')) : '' );
 				});
 				
 				// Hide when tabbing out of the input
@@ -132,7 +134,7 @@ if(jQuery) (function($) {
 				if( input.prop('disabled') ) return false;
 				
 				// Hide all other instances 
-				hide();				
+				hide();
 				
 				// Generate the selector
 				var selector = $('<div class="miniColors-selector"></div>');
@@ -219,7 +221,7 @@ if(jQuery) (function($) {
 				
 				// Fire open callback
 				if( input.data('open') ) {
-					input.data('open').call(input.get(0), '#' + hsb2hex(hsb), hsb2rgb(hsb));
+					input.data('open').call(input.get(0), input.data('prefix') + hsb2hex(hsb), hsb2rgb(hsb));
 				}
 				
 			};
@@ -239,8 +241,8 @@ if(jQuery) (function($) {
 					$(selector).fadeOut(100, function() {
 						// Fire close callback
 						if( input.data('close') ) {
-							var hsb = input.data('hsb'), hex = hsb2hex(hsb);	
-							input.data('close').call(input.get(0), '#' + hex, hsb2rgb(hsb));
+							var hsb = input.data('hsb'), hex = hsb2hex(hsb);
+							input.data('close').call(input.get(0), input.data('prefix') + hex, hsb2rgb(hsb));
 						}
 						$(this).remove();
 					});
@@ -251,7 +253,7 @@ if(jQuery) (function($) {
 			};
 			
 			var moveColor = function(input, event) {
-
+			
 				var colorPicker = input.data('colorPicker');
 				
 				colorPicker.hide();
@@ -332,15 +334,15 @@ if(jQuery) (function($) {
 			
 			var setColor = function(input, hsb, updateInput) {
 				input.data('hsb', hsb);
-				var hex = hsb2hex(hsb);	
-				if( updateInput ) input.val( '#' + convertCase(hex, input.data('letterCase')) );
+				var hex = hsb2hex(hsb);
+				if( updateInput ) input.val( input.data('prefix') + convertCase(hex, input.data('letterCase')) );
 				input.data('trigger').css('backgroundColor', '#' + hex);
 				if( input.data('selector') ) input.data('selector').find('.miniColors-colors').css('backgroundColor', '#' + hsb2hex({ h: hsb.h, s: 100, b: 100 }));
 				
 				// Fire change callback
 				if( input.data('change') ) {
 					if( hex === input.data('lastChange') ) return;
-					input.data('change').call(input.get(0), '#' + hex, hsb2rgb(hsb));
+					input.data('change').call(input.get(0), input.data('prefix') + hex, hsb2rgb(hsb));
 					input.data('lastChange', hex);
 				}
 				
@@ -348,7 +350,7 @@ if(jQuery) (function($) {
 			
 			var setColorFromInput = function(input) {
 				
-				input.val('#' + cleanHex(input.val()));
+				input.val(input.data('prefix') + cleanHex(input.val()));
 				var hex = expandHex(input.val());
 				if( !hex ) return false;
 				
@@ -383,7 +385,7 @@ if(jQuery) (function($) {
 				return string;
 			};
 			
-			var getColorPositionFromHSB = function(hsb) {				
+			var getColorPositionFromHSB = function(hsb) {
 				var x = Math.ceil(hsb.s / 0.67);
 				if( x < 0 ) x = 0;
 				if( x > 150 ) x = 150;
@@ -396,7 +398,7 @@ if(jQuery) (function($) {
 			var getHuePositionFromHSB = function(hsb) {
 				var y = 150 - (hsb.h / 2.4);
 				if( y < 0 ) h = 0;
-				if( y > 150 ) h = 150;				
+				if( y > 150 ) h = 150;
 				return { y: y - 1 };
 			};
 			
@@ -409,7 +411,7 @@ if(jQuery) (function($) {
 				if( !hex ) return null;
 				if( hex.length === 3 ) hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
 				return hex.length === 6 ? hex : null;
-			};			
+			};
 			
 			var hsb2rgb = function(hsb) {
 				var rgb = {};
@@ -485,7 +487,7 @@ if(jQuery) (function($) {
 				hsb.s *= 100/255;
 				hsb.b *= 100/255;
 				return hsb;
-			};			
+			};
 			
 			var hex2hsb = function(hex) {
 				var hsb = rgb2hsb(hex2rgb(hex));
@@ -497,7 +499,7 @@ if(jQuery) (function($) {
 			var hsb2hex = function(hsb) {
 				return rgb2hex(hsb2rgb(hsb));
 			};
-
+			
 			
 			// Handle calls to $([selector]).miniColors()
 			switch(o) {
@@ -521,9 +523,9 @@ if(jQuery) (function($) {
 							enable($(this));
 						}
 					});
-										
+					
 					return $(this);
-			
+				
 				case 'value':
 					
 					// Getter
@@ -531,7 +533,7 @@ if(jQuery) (function($) {
 						if( !$(this).hasClass('miniColors') ) return;
 						var input = $(this),
 							hex = expandHex(input.val());
-						return hex ? '#' + convertCase(hex, input.data('letterCase')) : null;
+						return hex ? input.data('prefix') + convertCase(hex, input.data('letterCase')) : null;
 					}
 					
 					// Setter
@@ -549,7 +551,7 @@ if(jQuery) (function($) {
 						if( !$(this).hasClass('miniColors') ) return;
 						destroy($(this));
 					});
-										
+					
 					return $(this);
 				
 				default:
@@ -574,7 +576,7 @@ if(jQuery) (function($) {
 			}
 			
 		}
-			
+	
 	});
 	
 })(jQuery);

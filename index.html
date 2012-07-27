@@ -25,7 +25,7 @@
 				// Enabling miniColors
 				//
 				
-				$(".color-picker").miniColors({
+				var options = {
 					letterCase: 'uppercase',
 					change: function(hex, rgb) {
 						logData('change', hex, rgb);
@@ -36,10 +36,12 @@
 					close: function(hex, rgb) {
 						logData('close', hex, rgb);
 					}
-				});
+				};
 				
+				$(".color-picker").not(".nohash").miniColors(options);
 				
-				
+				options.nohash = true;
+				$(".color-picker").filter(".nohash").miniColors(options)
 				
 				//
 				// Only for the demo
@@ -136,6 +138,10 @@
 			<input type="hidden" name="color4" class="color-picker" size="6" />
 		</p>
 		
+		<p>
+			Without hash prefix<br />
+			<input type="text" name="color5" class="color-picker nohash" size="6" />
+		</p>
 		
 		
 		<p style="margin-top: 50px;">
